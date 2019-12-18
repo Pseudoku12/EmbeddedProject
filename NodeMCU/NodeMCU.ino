@@ -15,7 +15,9 @@ void UARTreceive();
 //#define SW D2
 
 String message = "push"; // ArduinoIDE
+String message2 = "push2";
 String UARTrcvData;                            // AUTO
+String UARTrcvData2;
 char UARTrcvBuffer;                          // AUTO
 int UARTrcvCount;                           // AUTO
 unsigned long startTime;
@@ -49,7 +51,8 @@ void loop() {
     Serial.println("Enter !");
     UARTreceive();
     message = UARTrcvData;
-    Line_Notify(message); 
+    message2 = UARTrcvData2;
+    Line_Notify(message + message2);
   }
 }
 
@@ -98,6 +101,16 @@ void UARTreceive() { // --------------------------------------------------------
       //UARTrcvCount = UARTrcvCount + 1;
       UARTrcvBuffer = Serial.read();
       UARTrcvData += UARTrcvBuffer;
+  }
+  Serial.println(UARTrcvData);
+  UARTrcvCount = 0;
+  UARTrcvBuffer = 'a';
+  UARTrcvData2 = "";
+  while (Serial.available() && Serial.read()!='s');
+  while (Serial.available() && UARTrcvBuffer != '\r') {
+      //UARTrcvCount = UARTrcvCount + 1;
+      UARTrcvBuffer = Serial.read();
+      UARTrcvData2 += UARTrcvBuffer;
   }
   Serial.println(UARTrcvData);
   serial_flush();

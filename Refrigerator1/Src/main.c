@@ -51,8 +51,11 @@ osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 volatile int meres = 0;
 volatile int meresAtlag = 0;
+volatile int meres2 = 0;
+volatile int meresAtlag2 = 0;
 char buffer[100] = "s";
 HX711 hx11;
+HX711 hx112;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,9 +73,29 @@ void StartDefaultTask(void const * argument);
 /* USER CODE BEGIN 0 */
 void transmitter(void *arg){
 	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	meres = HX711_Value(hx11);
-	sprintf(buffer,"s%d\n\r", meres);
-	HAL_UART_Transmit(&huart1, &buffer, 20, 1000);
+	meres = -(HX711_Value(hx11) - 8547400) - 150000;
+	for(int i = 0;i<100;i++){
+		buffer[i] = '\0';
+	}
+	if(meres < 0){
+		sprintf(buffer,"sSlot 1 : Not enough food. Please refill. Current weight : %d\n\r", meres);
+	}
+	else{
+		sprintf(buffer,"sSlot 1 : Current weight : %d\n\r", meres);
+	}
+	HAL_UART_Transmit(&huart1, &buffer, 100, 1000);
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		meres2 = HX711_Value(hx112) - 8547400;
+		for(int i = 0;i<100;i++){
+			buffer[i] = '\0';
+		}
+		if(meres2 < 0){
+			sprintf(buffer,"sSlot 2 : Not enough food. Please refill. Current weight : %d\n\r", meres2);
+		}
+		else{
+			sprintf(buffer,"sSlot 2 : Current weight : %d\n\r", meres2);
+		}
+	HAL_UART_Transmit(&huart1, &buffer, 100, 1000);
 }
 osTimerDef(tm, transmitter);
 /* USER CODE END 0 */
@@ -86,12 +109,16 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	  hx11.gpioSck = HX711SCK_GPIO_Port;
 	  hx11.gpioData = HX711DT_GPIO_Port;
-	//hx11.gpioSck = GPIOA;
-	//hx11.gpioData = GPIOA;
 	  hx11.pinSck = HX711SCK_Pin;
 	  hx11.pinData = HX711DT_Pin;
 	  hx11.offset = 0;
 	  hx11.gain = 64;
+	  hx112.gpioSck = HX711SCK2_GPIO_Port;
+	  hx112.gpioData = HX711DT2_GPIO_Port;
+	  hx112.pinSck = HX711SCK2_Pin;
+	  hx112.pinData = HX711DT2_Pin;
+	  hx112.offset = 0;
+	  hx112.gain = 64;
   /* USER CODE END 1 */
   
 
@@ -117,6 +144,7 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HX711_Init(hx11);
+  HX711_Init(hx112);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -289,6 +317,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LD2_Pin|HX711SCK_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(HX711SCK2_GPIO_Port, HX711SCK2_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
@@ -302,11 +333,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : HX711SCK2_Pin */
+  GPIO_InitStruct.Pin = HX711SCK2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(HX711SCK2_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : HX711DT_Pin */
   GPIO_InitStruct.Pin = HX711DT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(HX711DT_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : HX711DT2_Pin */
+  GPIO_InitStruct.Pin = HX711DT2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(HX711DT2_GPIO_Port, &GPIO_InitStruct);
 
 }
 

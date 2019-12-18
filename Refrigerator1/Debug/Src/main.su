@@ -1,8 +1,8 @@
-main.c:71:6:transmitter	24	static
-main.c:84:5:main	56	static
-main.c:169:6:SystemClock_Config	88	static
-main.c:213:13:MX_USART1_UART_Init	8	static
-main.c:246:13:MX_USART2_UART_Init	8	static
-main.c:279:13:MX_GPIO_Init	48	static
-main.c:324:6:StartDefaultTask	16	static
-main.c:343:6:Error_Handler	4	static
+main.c:74:6:transmitter	32	static
+main.c:107:5:main	56	static
+main.c:197:6:SystemClock_Config	88	static
+main.c:241:13:MX_USART1_UART_Init	8	static
+main.c:274:13:MX_USART2_UART_Init	8	static
+main.c:307:13:MX_GPIO_Init	48	static
+main.c:368:6:StartDefaultTask	16	static
+main.c:387:6:Error_Handler	4	static
